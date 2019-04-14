@@ -51,7 +51,7 @@ public class FXMLController implements Initializable {
     private final ArrayList<File> listVideosPath = new ArrayList<>();
 
     private final Map<String, Boolean> iconList = new HashMap<>();
-    
+
     private Properties prop;
 
     @FXML
@@ -130,7 +130,7 @@ public class FXMLController implements Initializable {
         loadPropeties();
     }
 
-    private void goToState(Etat st) {
+    public void goToState(Etat st) {
         this.etat = st;
         switch (st) {
             case Init:
@@ -230,33 +230,8 @@ public class FXMLController implements Initializable {
     }
 
     private void traiter() {
-        double nVideo = 0;
-        this.progress.setProgress(nVideo);
-        this.iconList.clear();
-        String shellDarknet = this.prop.getProperty("darknetPath")+" ";
-
-        //traitement des vidéos
-        for (File f : this.listVideosPath) {
-            try {
-                ProcessBuilder pb = new ProcessBuilder(shellDarknet);
-                Process p = pb.start();     // Start the process.
-                p.waitFor();            // Wait for the process to finish.
-
-                iconDisplay(f, true);
-            } catch (IOException | InterruptedException e) {
-                iconDisplay(f, false);
-            } finally {
-                nVideo++;
-                this.progress.setProgress(nVideo / this.listVideosPath.size());
-            }
-
-        }
-        //changement d'état
-        if (this.videoSelected != null) {
-            goToState(Etat.videoSelected);
-        } else {
-            goToState(Etat.Fill);
-        }
+        ProcessVideo process = new ProcessVideo(this, listVideosPath);
+        new Thread(process).start();
     }
 
     public void iconDisplay(File f, boolean res) {
@@ -288,8 +263,8 @@ public class FXMLController implements Initializable {
             }
         });
     }
-    
-    private void loadPropeties(){
+
+    private void loadPropeties() {
         this.prop = new Properties();
         InputStream inputStream = getClass().getResourceAsStream("/properties/config.properties");
         try {
@@ -298,4 +273,21 @@ public class FXMLController implements Initializable {
             Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    public Map<String, Boolean> getIconList() {
+        return iconList;
+    }
+
+    public Properties getProp() {
+        return prop;
+    }
+    
+    public void setPregress(Double db){
+        this.progress.setProgress(db);
+    }
+
+    public Object getVideoSelected() {
+        return videoSelected;
+    }
+    
 }
