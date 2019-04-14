@@ -30,9 +30,9 @@ public class ProcessVideo implements Runnable {
         this.cont.setPregress(nVideo);
         Map<String, Boolean> iconList = this.cont.getIconList();
         iconList.clear();
-        String pathDarknet = this.cont.getProp().getProperty("darknetPath");
+        String pathDarknet = this.cont.getProp().getProperty("darknetPath")+"/";
         String callDarknet = "./darknet detect cfg/yolov3-tiny.cfg yolov3-tiny.weights ";
-        String pathSave = this.cont.getProp().getProperty("videoFolder");
+        String pathSave = this.cont.getProp().getProperty("videoFolder")+"/";
 
         //traitement des vidéos
         for (File f : this.videos) {
@@ -41,7 +41,7 @@ public class ProcessVideo implements Runnable {
                 Process p = pb.start();     // Start the process.
                 p.waitFor();            // Wait for the process to finish.
 
-                ProcessBuilder pbCp = new ProcessBuilder("sh", "-c", "cp " + pathDarknet + "/predictions.jpg " + pathSave + "/" + f.getName());
+                ProcessBuilder pbCp = new ProcessBuilder("sh", "-c", "cp " + pathDarknet + "predictions.jpg " + pathSave + f.getName());
                 Process pCp = pbCp.start();     // Start the process.
                 pCp.waitFor();            // Wait for the process to finish.
 

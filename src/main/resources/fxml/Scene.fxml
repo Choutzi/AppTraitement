@@ -22,21 +22,19 @@
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
-          <Menu mnemonicParsing="false" text="File">
+          <Menu mnemonicParsing="false" text="Configuration">
             <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
+              <MenuItem mnemonicParsing="false" onAction="#changeVideoFolder" text="Changer dossier de sauvegarde des videos" />
+                  <MenuItem mnemonicParsing="false" onAction="#changeResultFolder" text="Changer dossier de sauvegarde des résultats" />
+                  <MenuItem mnemonicParsing="false" onAction="#changeDarknetFolder" text="Changer dossier de Darknet" />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="About" />
-            </items>
-          </Menu>
+            <Menu mnemonicParsing="false" text="Mode">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="Vidéo" />
+                  <MenuItem mnemonicParsing="false" text="Image" />
+               </items>
+            </Menu>
         </menus>
       </MenuBar>
    </top>

@@ -1,8 +1,12 @@
 package com.hiveprotect.apptraitement;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +19,10 @@ import java.util.logging.Logger;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -23,6 +30,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 
 public class FXMLController implements Initializable {
 
@@ -266,9 +274,16 @@ public class FXMLController implements Initializable {
 
     private void loadPropeties() {
         this.prop = new Properties();
-        InputStream inputStream = getClass().getResourceAsStream("/properties/config.properties");
+        InputStream inputStream;
+        try {
+            inputStream = new FileInputStream("config.properties");
+        } catch (FileNotFoundException ex) {
+            inputStream = getClass().getResourceAsStream("/properties/config.properties");
+            copyInputStreamToFile(inputStream, new File("config.properties"));
+        }
         try {
             this.prop.load(inputStream);
+            inputStream.close();
         } catch (IOException ex) {
             Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -281,13 +296,70 @@ public class FXMLController implements Initializable {
     public Properties getProp() {
         return prop;
     }
-    
-    public void setPregress(Double db){
+
+    public void setPregress(Double db) {
         this.progress.setProgress(db);
     }
 
     public Object getVideoSelected() {
         return videoSelected;
     }
-    
+
+    @FXML
+    private void changeVideoFolder(ActionEvent event) {
+        openPopup("videoFolder");
+    }
+
+    @FXML
+    private void changeResultFolder(ActionEvent event) {
+        openPopup("tabFolder");
+    }
+
+    @FXML
+    private void changeDarknetFolder(ActionEvent event) {
+        openPopup("darknetPath");
+    }
+
+    private void openPopup(String prop) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/Popup.fxml"));
+            StagePopup stage = new StagePopup(this, prop);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    void changeProp(String propertie, String newPropertie) {
+        System.out.println(this.prop.getProperty(propertie));
+        OutputStream out = null;
+        try {
+            this.prop.setProperty(propertie, newPropertie);
+            out = new FileOutputStream(new File("config.properties"));
+            this.prop.store(out, "");
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                out.close();
+            } catch (IOException ex) {
+            }
+        }
+
+    }
+
+    private void copyInputStreamToFile(InputStream in, File file) {
+        try {
+            OutputStream out = new FileOutputStream(file);
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            out.close();
+        } catch (IOException e) {
+        }
+    }
 }
