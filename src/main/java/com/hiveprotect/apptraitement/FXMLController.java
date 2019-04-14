@@ -169,7 +169,7 @@ public class FXMLController implements Initializable {
 
         //default folder
         //fc.setInitialDirectory("C:\\...");
-        fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("MP4 vidéo", "*.mp4"));
+        fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("MP4 vidéo", "*.jpg"));
 
         List<File> selectedFiles = fc.showOpenMultipleDialog(null);
 

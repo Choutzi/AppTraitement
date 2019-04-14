@@ -30,14 +30,20 @@ public class ProcessVideo implements Runnable {
         this.cont.setPregress(nVideo);
         Map<String, Boolean> iconList = this.cont.getIconList();
         iconList.clear();
-        String shellDarknet = this.cont.getProp().getProperty("darknetPath") + " ";
+        String pathDarknet = this.cont.getProp().getProperty("darknetPath");
+        String callDarknet = "./darknet detect cfg/yolov3-tiny.cfg yolov3-tiny.weights ";
+        String pathSave = this.cont.getProp().getProperty("videoFolder");
 
         //traitement des vidéos
         for (File f : this.videos) {
             try {
-                ProcessBuilder pb = new ProcessBuilder(shellDarknet);
+                ProcessBuilder pb = new ProcessBuilder("sh", "-c", "cd " + pathDarknet + " ; " + callDarknet + f.getAbsolutePath());
                 Process p = pb.start();     // Start the process.
                 p.waitFor();            // Wait for the process to finish.
+
+                ProcessBuilder pbCp = new ProcessBuilder("sh", "-c", "cp " + pathDarknet + "/predictions.jpg " + pathSave + "/" + f.getName());
+                Process pCp = pbCp.start();     // Start the process.
+                pCp.waitFor();            // Wait for the process to finish.
 
                 this.cont.iconDisplay(f, true);
             } catch (IOException | InterruptedException e) {
@@ -46,13 +52,12 @@ public class ProcessVideo implements Runnable {
                 nVideo++;
                 this.cont.setPregress(nVideo / this.videos.size());
             }
-
-            //changement d'état
-            if (this.cont.getVideoSelected() != null) {
-                this.cont.goToState(Etat.videoSelected);
-            } else {
-                this.cont.goToState(Etat.Fill);
-            }
+        }
+        //changement d'état
+        if (this.cont.getVideoSelected() != null) {
+            this.cont.goToState(Etat.videoSelected);
+        } else {
+            this.cont.goToState(Etat.Fill);
         }
     }
 
