@@ -246,7 +246,7 @@ public class FXMLController implements Initializable {
     }
 
     private void traiter() {
-        ProcessVideo process = new ProcessVideo(this, listVideosPath);
+        ProcessImage process = new ProcessImage(this, listVideosPath);
         new Thread(process).start();
     }
 
