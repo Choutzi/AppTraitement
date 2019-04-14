@@ -20,7 +20,7 @@
       </ListView>
    </center>
    <top>
-      <MenuBar BorderPane.alignment="CENTER">
+      <MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
         <menus>
           <Menu mnemonicParsing="false" text="Configuration">
             <items>

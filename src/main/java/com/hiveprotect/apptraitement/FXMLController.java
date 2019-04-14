@@ -26,6 +26,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -61,6 +62,9 @@ public class FXMLController implements Initializable {
     private final Map<String, Boolean> iconList = new HashMap<>();
 
     private Properties prop;
+    
+    @FXML
+    private MenuBar menuBar;
 
     @FXML
     private void ajouter_Clic(ActionEvent event) throws Exception {
@@ -147,6 +151,7 @@ public class FXMLController implements Initializable {
                 this.traiterBut.setDisable(true);
                 this.annulerBut.setDisable(true);
                 this.listView.setDisable(true);
+                this.menuBar.setDisable(false);
                 break;
             case Fill:
                 this.ajouterBut.setDisable(false);
@@ -154,6 +159,7 @@ public class FXMLController implements Initializable {
                 this.traiterBut.setDisable(false);
                 this.annulerBut.setDisable(true);
                 this.listView.setDisable(false);
+                this.menuBar.setDisable(false);
                 break;
             case Process:
                 this.ajouterBut.setDisable(true);
@@ -161,6 +167,7 @@ public class FXMLController implements Initializable {
                 this.traiterBut.setDisable(true);
                 this.annulerBut.setDisable(false);
                 this.listView.setDisable(true);
+                this.menuBar.setDisable(true);
                 break;
             case videoSelected:
                 this.ajouterBut.setDisable(false);
@@ -168,6 +175,7 @@ public class FXMLController implements Initializable {
                 this.traiterBut.setDisable(false);
                 this.annulerBut.setDisable(true);
                 this.listView.setDisable(false);
+                this.menuBar.setDisable(false);
                 break;
         }
     }
