@@ -11,17 +11,32 @@ import javafx.stage.Stage;
  *
  * @author Choutzi
  */
-public class StagePopup extends Stage{
-    private final FXMLController fx ;
+public class StagePopup extends Stage {
+
+    private final FXMLController fx;
     private final String propertie;
 
     public StagePopup(FXMLController f, String prop) {
         super();
         this.fx = f;
         this.propertie = prop;
+
+        switch (prop) {
+            case "darknetPath":
+                setTitle("Configuration - Dossier de l'algorithme");
+                break;
+            case "videoFolder":
+                setTitle("Configuration - Dossier des Vidéos résultats");
+                break;
+            case "tabFolder":
+                setTitle("Configuration - Dossier des Données résultats");
+                break;
+            default:
+                throw new UnsupportedOperationException("Mauvaise propriété");
+        }
     }
-    
-    public void changeProp(String newPropertie){
+
+    public void changeProp(String newPropertie) {
         fx.changeProp(propertie, newPropertie);
     }
 }

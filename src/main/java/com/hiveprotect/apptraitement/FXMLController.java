@@ -62,7 +62,7 @@ public class FXMLController implements Initializable {
     private final Map<String, Boolean> iconList = new HashMap<>();
 
     private Properties prop;
-    
+
     @FXML
     private MenuBar menuBar;
 
@@ -330,11 +330,17 @@ public class FXMLController implements Initializable {
 
     private void openPopup(String prop) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/Popup.fxml"));
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Popup.fxml"));
+            Parent root = (Parent) loader.load();
+            PopupController controller = (PopupController) loader.getController();
+            
             StagePopup stage = new StagePopup(this, prop);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
+            controller.setInput(this.prop.getProperty(prop));
             stage.show();
+            
         } catch (IOException ex) {
             Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
         }
