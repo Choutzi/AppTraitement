@@ -10,7 +10,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Map;
@@ -26,11 +25,16 @@ public class ProcessVideo extends ProcessAbs implements Runnable {
     private final FXMLController cont;
     private final ArrayList<File> videos;
     private boolean work;
+    private int totalTime = 0;
+    private int framePasse = 0;
+    private Process p;
 
     public ProcessVideo(FXMLController cont, ArrayList<File> videos) {
         this.cont = cont;
         this.videos = videos;
         this.work = true;
+        init();
+
     }
 
     @Override
@@ -52,21 +56,19 @@ public class ProcessVideo extends ProcessAbs implements Runnable {
             String name = f.getName().substring(0, f.getName().lastIndexOf('.')) + "_result.mp4";
             try {
                 String ligne = "";
-                ProcessBuilder pb = new ProcessBuilder("sh", "-c", "cd "+pathDarknet+" ; "+callDarknet+" "+f.getAbsolutePath()+" -out_filename result.avi");
-                Process p = pb.start();     // Start the process.
+                ProcessBuilder pb = new ProcessBuilder("sh", "-c", "cd " + pathDarknet + " ; " + callDarknet + " " + f.getAbsolutePath() + " -out_filename result.avi");
+                this.p = pb.start();     // Start the process.
                 // Wait for the process to finish.
 
                 BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+                //BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
                 outToString(output, f);
 
-                while ((ligne = error.readLine()) != null) {
-                    System.out.println(ligne + " - error");
-                }
-
+                //while ((ligne = error.readLine()) != null) {
+                //    System.out.println(ligne + " - error");
+                //}
                 p.waitFor();
-                
 
                 ProcessBuilder pbCp = new ProcessBuilder("sh", "-c", "cp " + pathDarknet + "result.avi " + pathSave + name);
                 Process pCp = pbCp.start();     // Start the process.
@@ -86,6 +88,7 @@ public class ProcessVideo extends ProcessAbs implements Runnable {
         } else {
             this.cont.goToState(Etat.Fill);
         }
+        this.cont.finished();   
     }
 
     private void outToString(BufferedReader br, File f) {
@@ -102,10 +105,14 @@ public class ProcessVideo extends ProcessAbs implements Runnable {
             String[] head = {"Classe", "Confiance", "left_x", "top_y", "width", "height", "frame"};
             writer.writeNext(head);
 
-            while ((ligne = br.readLine()) != null) {
-                System.out.println(ligne);
+            while (this.work && (ligne = br.readLine()) != null ) {
                 if (ligne.contains("Objects:")) {
                     frame++;
+                }
+
+                if (ligne.contains("FPS:")) {
+                    double fps = Double.parseDouble(ligne.replaceAll("[^\\d.]", ""));
+                    setTime(fps, frame);
                 }
 
                 String[] don = ligne.split(":");
@@ -121,6 +128,7 @@ public class ProcessVideo extends ProcessAbs implements Runnable {
                 }
             }
             writer.writeNext(new String[]{Integer.toString(frame)});
+            this.framePasse = this.framePasse + frame;
             writer.close();
         } catch (IOException ex) {
             Logger.getLogger(ProcessVideo.class.getName()).log(Level.SEVERE, null, ex);
@@ -130,6 +138,39 @@ public class ProcessVideo extends ProcessAbs implements Runnable {
     @Override
     public void setWork(boolean work) {
         this.work = work;
+    }
+
+    private void setTime(double fps, int frame) {
+        Double tempTotal = (this.totalTime / fps) * 1000;
+        Double tempRestant = ((this.totalTime - this.framePasse - frame) / fps) * 1000;
+
+        System.out.println(fps);
+        this.cont.timer(tempRestant.longValue());
+    }
+
+    private void init() {
+        for (File f : this.videos) {
+            try {
+                String ligne = "";
+                int nbFrame = 0;
+                ProcessBuilder pb = new ProcessBuilder("sh", "-c", "mediainfo --fullscreen " + f.getAbsolutePath() + " | grep 'Frame count'");
+                Process pr = pb.start();
+                pr.waitFor();
+
+                BufferedReader output = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+
+                while ((ligne = output.readLine()) != null && this.work) {
+                    nbFrame = Integer.parseInt(ligne.replaceAll("[^0-9]", ""));
+                }
+
+                this.totalTime = this.totalTime + nbFrame;
+                output.close();
+            } catch (IOException | InterruptedException ex) {
+                Logger.getLogger(ProcessVideo.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        Double tempTotal = (this.totalTime / 1.0) * 1000;
+        this.cont.initTp(tempTotal.longValue());
     }
 
 }

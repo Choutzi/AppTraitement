@@ -5,9 +5,6 @@
  */
 package com.hiveprotect.apptraitement;
 
-import java.io.BufferedReader;
-import java.io.File;
-
 /**
  *
  * @author hiveprotect

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.value.ObservableValue;
@@ -24,6 +25,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuBar;
@@ -65,8 +67,13 @@ public class FXMLController implements Initializable {
 
     @FXML
     private MenuBar menuBar;
-    
+
     private ProcessAbs processing;
+
+    @FXML
+    private Label clock;
+
+    private TimeProcess tp;
 
     @FXML
     private void ajouter_Clic(ActionEvent event) throws Exception {
@@ -131,7 +138,7 @@ public class FXMLController implements Initializable {
                 throw new Exception("Aucun traitement à annuler");
             case Process:
                 goToState(Etat.Fill);
-                this.processing.setWork(false);
+                annuler();
                 break;
             case videoSelected:
                 throw new Exception("Aucun traitement à annuler");
@@ -155,6 +162,7 @@ public class FXMLController implements Initializable {
                 this.annulerBut.setDisable(true);
                 this.listView.setDisable(true);
                 this.menuBar.setDisable(false);
+                this.clock.setText("0");
                 break;
             case Fill:
                 this.ajouterBut.setDisable(false);
@@ -251,6 +259,7 @@ public class FXMLController implements Initializable {
     private void traiter() {
         this.processing = new ProcessVideo(this, listVideosPath);
         new Thread(this.processing).start();
+
     }
 
     public void iconDisplay(File f, boolean res) {
@@ -337,13 +346,13 @@ public class FXMLController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Popup.fxml"));
             Parent root = (Parent) loader.load();
             PopupController controller = (PopupController) loader.getController();
-            
+
             StagePopup stage = new StagePopup(this, prop);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
             controller.setInput(this.prop.getProperty(prop));
             stage.show();
-            
+
         } catch (IOException ex) {
             Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -379,4 +388,33 @@ public class FXMLController implements Initializable {
         } catch (IOException e) {
         }
     }
+
+    public void timer(Long time) {
+        this.tp.setTime(time);
+    }
+
+    public Label getClock() {
+        return clock;
+    }
+
+    public void setClock(String time) {
+        this.clock.setText(time);
+    }
+
+    public void initTp(Long time) {
+        this.tp = new TimeProcess(time, this);
+        Timer t = new Timer();
+        t.scheduleAtFixedRate(this.tp, 0, 1000);
+    }
+
+    private void annuler() {
+        this.processing.setWork(false);
+        finished();
+    }
+
+    public void finished() {
+        this.tp.cancel();
+        this.clock.setText("");
+    }
+
 }

@@ -20,6 +20,9 @@ public class MainApp extends Application {
         stage.setTitle("JavaFX and Maven");
         stage.setScene(scene);
         stage.show();
+        stage.setOnCloseRequest((event) -> {
+            System.exit(0);
+        });
     }
 
     /**
