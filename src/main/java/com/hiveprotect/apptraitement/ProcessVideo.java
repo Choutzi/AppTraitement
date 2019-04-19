@@ -21,13 +21,13 @@ import java.util.logging.Logger;
  *
  * @author Choutzi
  */
-public class ProcessImage extends ProcessAbs implements Runnable {
+public class ProcessVideo extends ProcessAbs implements Runnable {
 
     private final FXMLController cont;
     private final ArrayList<File> videos;
     private boolean work;
 
-    public ProcessImage(FXMLController cont, ArrayList<File> videos) {
+    public ProcessVideo(FXMLController cont, ArrayList<File> videos) {
         this.cont = cont;
         this.videos = videos;
         this.work = true;
@@ -40,7 +40,7 @@ public class ProcessImage extends ProcessAbs implements Runnable {
         Map<String, Boolean> iconList = this.cont.getIconList();
         iconList.clear();
         String pathDarknet = this.cont.getProp().getProperty("darknetPath") + "/";
-        String callDarknet = "./darknet detect cfg/yolov3-tiny.cfg yolov3-tiny.weights ";
+        String callDarknet = "./darknet detector demo data/obj.data cfg/yolov3-tiny-hornet.cfg backup/yolov3-tiny-hornet_9000.weights -dont_show ";
         String pathSave = this.cont.getProp().getProperty("videoFolder") + "/";
 
         //traitement des vidéos
@@ -49,19 +49,26 @@ public class ProcessImage extends ProcessAbs implements Runnable {
                 return;
             }
 
-            String name = f.getName().substring(0, f.getName().lastIndexOf('.')) + "_result.jpg";
+            String name = f.getName().substring(0, f.getName().lastIndexOf('.')) + "_result.mp4";
             try {
-                ProcessBuilder pb = new ProcessBuilder("sh", "-c", "cd " + pathDarknet + " ; " + callDarknet + f.getAbsolutePath());
+                String ligne = "";
+                ProcessBuilder pb = new ProcessBuilder("sh", "-c", "cd "+pathDarknet+" ; "+callDarknet+" "+f.getAbsolutePath()+" -out_filename result.avi");
                 Process p = pb.start();     // Start the process.
-                p.waitFor();            // Wait for the process to finish.
+                // Wait for the process to finish.
 
-                InputStream is = p.getInputStream();
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr);
+                BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
-                outToString(br, f);
+                outToString(output, f);
 
-                ProcessBuilder pbCp = new ProcessBuilder("sh", "-c", "cp " + pathDarknet + "predictions.jpg " + pathSave + name);
+                while ((ligne = error.readLine()) != null) {
+                    System.out.println(ligne + " - error");
+                }
+
+                p.waitFor();
+                
+
+                ProcessBuilder pbCp = new ProcessBuilder("sh", "-c", "cp " + pathDarknet + "result.avi " + pathSave + name);
                 Process pCp = pbCp.start();     // Start the process.
                 pCp.waitFor();            // Wait for the process to finish.
 
@@ -86,15 +93,21 @@ public class ProcessImage extends ProcessAbs implements Runnable {
             String ligne;
             String pathResult = this.cont.getProp().getProperty("tabFolder") + "/";
             String name = f.getName().substring(0, f.getName().lastIndexOf('.')) + ".csv";
+            int frame = 0;
 
             FileWriter wr = new FileWriter(new File(pathResult + name));
 
             CSVWriter writer = new CSVWriter(wr);
 
-            String[] head = {"Classe", "Confiance", "left_x", "top_y", "width", "height"};
+            String[] head = {"Classe", "Confiance", "left_x", "top_y", "width", "height", "frame"};
             writer.writeNext(head);
 
             while ((ligne = br.readLine()) != null) {
+                System.out.println(ligne);
+                if (ligne.contains("Objects:")) {
+                    frame++;
+                }
+
                 String[] don = ligne.split(":");
                 if (don.length == 6) {
                     String classe = don[0];
@@ -104,13 +117,13 @@ public class ProcessImage extends ProcessAbs implements Runnable {
                     String width = don[4].replaceAll("[^0-9]", "");
                     String height = don[5].replaceAll("[^0-9]", "");
 
-                    writer.writeNext(new String[]{classe, percent, left_x, top_y, width, height});
+                    writer.writeNext(new String[]{classe, percent, left_x, top_y, width, height, Integer.toString(frame)});
                 }
             }
-
+            writer.writeNext(new String[]{Integer.toString(frame)});
             writer.close();
         } catch (IOException ex) {
-            Logger.getLogger(ProcessImage.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ProcessVideo.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

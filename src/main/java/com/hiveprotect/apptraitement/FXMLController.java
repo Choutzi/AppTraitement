@@ -65,6 +65,8 @@ public class FXMLController implements Initializable {
 
     @FXML
     private MenuBar menuBar;
+    
+    private ProcessAbs processing;
 
     @FXML
     private void ajouter_Clic(ActionEvent event) throws Exception {
@@ -129,6 +131,7 @@ public class FXMLController implements Initializable {
                 throw new Exception("Aucun traitement à annuler");
             case Process:
                 goToState(Etat.Fill);
+                this.processing.setWork(false);
                 break;
             case videoSelected:
                 throw new Exception("Aucun traitement à annuler");
@@ -185,7 +188,7 @@ public class FXMLController implements Initializable {
 
         //default folder
         //fc.setInitialDirectory("C:\\...");
-        fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("MP4 vidéo", "*.jpg"));
+        fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("MP4 vidéo", "*.avi"));
 
         List<File> selectedFiles = fc.showOpenMultipleDialog(null);
 
@@ -246,8 +249,8 @@ public class FXMLController implements Initializable {
     }
 
     private void traiter() {
-        ProcessImage process = new ProcessImage(this, listVideosPath);
-        new Thread(process).start();
+        this.processing = new ProcessVideo(this, listVideosPath);
+        new Thread(this.processing).start();
     }
 
     public void iconDisplay(File f, boolean res) {
