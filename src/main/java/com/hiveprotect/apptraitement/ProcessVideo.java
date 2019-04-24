@@ -74,7 +74,9 @@ public class ProcessVideo extends ProcessAbs implements Runnable {
                 Process pCp = pbCp.start();     // Start the process.
                 pCp.waitFor();            // Wait for the process to finish.
 
-                this.cont.iconDisplay(f, true);
+                if (this.work) {
+                    this.cont.iconDisplay(f, true);
+                }
             } catch (IOException | InterruptedException e) {
                 this.cont.iconDisplay(f, false);
             } finally {
@@ -88,7 +90,7 @@ public class ProcessVideo extends ProcessAbs implements Runnable {
         } else {
             this.cont.goToState(Etat.Fill);
         }
-        this.cont.finished();   
+        this.cont.finished();
     }
 
     private void outToString(BufferedReader br, File f) {
@@ -105,7 +107,7 @@ public class ProcessVideo extends ProcessAbs implements Runnable {
             String[] head = {"Classe", "Confiance", "left_x", "top_y", "width", "height", "frame"};
             writer.writeNext(head);
 
-            while (this.work && (ligne = br.readLine()) != null ) {
+            while (this.work && (ligne = br.readLine()) != null) {
                 if (ligne.contains("Objects:")) {
                     frame++;
                 }

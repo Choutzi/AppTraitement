@@ -246,7 +246,7 @@ public class FXMLController implements Initializable {
         int index = -1;
 
         for (File f : this.listVideosPath) {
-            if (f.getAbsoluteFile().equals(video)) {
+            if (f.getAbsolutePath().equals(video)) {
                 index = this.listVideosPath.indexOf(f);
             }
         }
@@ -359,7 +359,6 @@ public class FXMLController implements Initializable {
     }
 
     void changeProp(String propertie, String newPropertie) {
-        System.out.println(this.prop.getProperty(propertie));
         OutputStream out = null;
         try {
             this.prop.setProperty(propertie, newPropertie);
@@ -410,6 +409,11 @@ public class FXMLController implements Initializable {
     private void annuler() {
         this.processing.setWork(false);
         finished();
+        try {
+            ProcessBuilder pb = new ProcessBuilder("sh", "-c", "killall darknet");
+            Process p = pb.start();
+        } catch (IOException ex) {
+        }
     }
 
     public void finished() {
