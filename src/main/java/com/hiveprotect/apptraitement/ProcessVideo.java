@@ -56,7 +56,7 @@ public class ProcessVideo extends ProcessAbs implements Runnable {
             String name = f.getName().substring(0, f.getName().lastIndexOf('.')) + "_result.mp4";
             try {
                 String ligne = "";
-                ProcessBuilder pb = new ProcessBuilder("sh", "-c", "cd " + pathDarknet + " ; " + callDarknet + " " + f.getAbsolutePath() + " -out_filename result.avi");
+                ProcessBuilder pb = new ProcessBuilder("sh", "-c","export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64 ; cd " + pathDarknet + " ; " + callDarknet + " " + f.getAbsolutePath() + " -out_filename result.avi");
                 this.p = pb.start();     // Start the process.
                 // Wait for the process to finish.
 
